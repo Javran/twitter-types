@@ -1,4 +1,4 @@
-{-# LANGUAGE OverloadedStrings, DeriveDataTypeable, RecordWildCards, DeriveGeneric, CPP #-}
+{-# LANGUAGE OverloadedStrings, DeriveDataTypeable, RecordWildCards, DeriveGeneric, CPP, ScopedTypeVariables #-}
 
 module Web.Twitter.Types
        ( UserId
@@ -154,35 +154,36 @@ data Status = Status
 
 instance FromJSON Status where
     parseJSON (Object o) = checkError o >>
-        Status <$> o .:? "contributors" .!= Nothing
-               <*> o .:? "coordinates" .!= Nothing
-               <*> (o .:  "created_at" >>= return . fromTwitterTime)
-               <*> ((o .: "current_user_retweet" >>= (.: "id")) <|> return Nothing)
-               <*> o .:? "entities"
-               <*> o .:? "extended_entities"
-               <*> o .:? "favorite_count" .!= 0
-               <*> o .:? "favorited"
-               <*> o .:? "filter_level"
-               <*> o .:  "id"
-               <*> o .:? "in_reply_to_screen_name" .!= Nothing
-               <*> o .:? "in_reply_to_status_id" .!= Nothing
-               <*> o .:? "in_reply_to_user_id" .!= Nothing
-               <*> o .:? "lang"
-               <*> o .:? "place" .!= Nothing
-               <*> o .:? "possibly_sensitive"
-               <*> o .:? "scopes"
-               <*> o .:? "quoted_status_id"
-               <*> o .:? "quoted_status"
-               <*> o .:? "retweet_count" .!= 0
-               <*> o .:? "retweeted"
-               <*> o .:? "retweeted_status"
-               <*> o .:  "source"
-               <*> o .:  "text"
-               <*> o .:  "truncated"
-               <*> o .:  "user"
-               <*> o .:? "withheld_copyright"
-               <*> o .:? "withheld_in_countries"
-               <*> o .:? "withheld_scope"
+        o .: "truncated" >>= \truncated ->
+            Status <$> o .:? "contributors" .!= Nothing
+                   <*> o .:? "coordinates" .!= Nothing
+                   <*> (o .:  "created_at" >>= return . fromTwitterTime)
+                   <*> ((o .: "current_user_retweet" >>= (.: "id")) <|> return Nothing)
+                   <*> o .:? "entities"
+                   <*> o .:? "extended_entities"
+                   <*> o .:? "favorite_count" .!= 0
+                   <*> o .:? "favorited"
+                   <*> o .:? "filter_level"
+                   <*> o .:  "id"
+                   <*> o .:? "in_reply_to_screen_name" .!= Nothing
+                   <*> o .:? "in_reply_to_status_id" .!= Nothing
+                   <*> o .:? "in_reply_to_user_id" .!= Nothing
+                   <*> o .:? "lang"
+                   <*> o .:? "place" .!= Nothing
+                   <*> o .:? "possibly_sensitive"
+                   <*> o .:? "scopes"
+                   <*> o .:? "quoted_status_id"
+                   <*> o .:? "quoted_status"
+                   <*> o .:? "retweet_count" .!= 0
+                   <*> o .:? "retweeted"
+                   <*> o .:? "retweeted_status"
+                   <*> o .:  "source"
+                   <*> o .: (if truncated then "text" else "full_text")
+                   <*> pure truncated
+                   <*> o .:  "user"
+                   <*> o .:? "withheld_copyright"
+                   <*> o .:? "withheld_in_countries"
+                   <*> o .:? "withheld_scope"
     parseJSON v = fail $ "couldn't parse status from: " ++ show v
 
 instance ToJSON Status where
