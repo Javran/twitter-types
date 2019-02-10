@@ -178,7 +178,7 @@ instance FromJSON Status where
                    <*> o .:? "retweeted"
                    <*> o .:? "retweeted_status"
                    <*> o .:  "source"
-                   <*> o .: (if truncated then "text" else "full_text")
+                   <*> ((o .: "text") <|> (o .: "full_text"))
                    <*> pure truncated
                    <*> o .:  "user"
                    <*> o .:? "withheld_copyright"
